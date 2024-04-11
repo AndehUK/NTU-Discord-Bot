@@ -13,8 +13,36 @@ if TYPE_CHECKING:
 
 
 class Admin(Cog):
+    @app_commands.command(name="adminhelp", description="Show the admin help menu")
+    @app_commands.default_permissions(moderate_members=True)
+    @app_commands.guild_only()
+    async def admin_help(self, itr: discord.Interaction[DevSocBot]) -> None:
+        cog = itr.client.get_cog("Admin")
+
+        if not cog:
+            # This shouldn't ever trigger, but just in case
+            return await itr.response.send_message(
+                "The Admin cog is not loaded.", ephemeral=True
+            )
+
+        embed = discord.Embed(
+            title="Admin Commands",
+            description="*This dialog gives you all the admin commands for DevBot.*",
+            color=0xE7EC11,
+        )
+
+        for command in cog.walk_app_commands():
+            embed.add_field(
+                name=f"/{command.name}",
+                value=f"```{command.description}```",
+                inline=False,
+            )
+
+        await itr.response.send_message(embed=embed, ephemeral=True)
+
     @app_commands.command(name="mute", description="Mute a member in the server")
     @app_commands.default_permissions(moderate_members=True)
+    @app_commands.guild_only()
     async def mute_member(
         self,
         itr: discord.Interaction[DevSocBot],
