@@ -1,42 +1,97 @@
+from __future__ import annotations
+
+# Core Imports
+import traceback
+
+# Third Party Packages
+import aiohttp
 import discord
-import os
-import asyncio
 from discord.ext import commands
 
-intents = discord.Intents.default()
-intents.members = True
-intents.typing = True
-intents.presences = True
-intents.messages = True
-intents.guilds = True
-intents.reactions = True
+# Local Imports
+from cogs import COGS
+from utils.logger import Logger
+from utils.tree import Tree
 
-client = commands.Bot(command_prefix=".", owner_id=83616065854115840, description="DevBot", intents=intents)
-client.remove_command('help')
 
-TOKEN = os.environ["TOKEN"]
+class DevSocBot(commands.Bot):
+    """The main Discord Bot class"""
 
-@client.event
-async def on_ready():
+    _is_ready: bool
+    logger: Logger
+    session: aiohttp.ClientSession
 
-    print(f"\n\nLogged in as: {client.user.name} - {client.user.id}\nVersion: {discord.__version__}\n")
-    print("Successfully logged in")
+    def __init__(self) -> None:
+        self._is_ready = False
+        self.logger = Logger("DevSocBot", console=True)
 
-    client.botLogChannel = await client.fetch_channel(814152479100633128)
-    client.botCommandChannel = await client.fetch_channel(517651663729852416)
-    client.roomChannel = await client.fetch_channel(892436503890915438)
+        super().__init__(
+            command_prefix=".",
+            description="Discord Bot for the DevSoc Discord Server. Rewritten by @AndehUK on GitHub",
+            intents=discord.Intents.all(),  # Be more specific with intents once we figure out which exact intents we need
+            tree_cls=Tree,
+            owner_ids={
+                957437570546012240,  # andehx.
+            },
+        )
 
-#function to make the bot print every 28mins so Heroku doesn't stop it
-async def stay_awake():
-    await client.wait_until_ready()
-    while not client.is_closed():
-        print('Im awake :)')
-        await asyncio.sleep(1680) #runs every 28mins.
+    async def setup_hook(self) -> None:
+        """
+        A coroutine to be called to setup the bot after logging in
+        but before we connect to the Discord Websocket.
 
-for filename in os.listdir("./cogs"):
-    if filename.endswith(".py"):
-        client.load_extension(f"cogs.{filename[:-3]}")
-        print(f"Loaded Cog: {filename}")
+        Mainly used to load our cogs / extensions.
+        """
 
-client.loop.create_task(stay_awake())
-client.run(TOKEN)
+        # Jishaku is our debugging tool installed from PyPi (See README.md)
+        await self.load_extension("jishaku")
+        loaded_cogs = 1
+
+        # Loop through our COGS Tuple and load each cog
+        for cog in COGS:
+            try:
+                await self.load_extension(cog)
+                loaded_cogs += 1
+                cog_name = cog.removeprefix("cogs.")
+                self.logger.info(f"Loaded {cog_name} cog successfully!")
+            except Exception as e:
+                tb = traceback.format_exc()
+                self.logger.error(f"{type(e)} Exception in loading {cog}\n{tb}")
+                continue
+
+        self.logger.info(f"Successfully loaded {loaded_cogs}/{len(COGS)+1} cogs!")
+
+    async def on_ready(self) -> None:
+        """
+        A coroutine to be called every time the bot connects to the
+        Discord Websocket.
+
+        This can be called multiple times if the bot disconnects and
+        reconnects, hence why we create the `_is_ready` class variable
+        to prevent functionality that should only take place on our first
+        start-up from happening again.
+        """
+
+        if self._is_ready:
+            return self.logger.critical("Bot reconnected to Discord gateway")
+
+        self._is_ready = True
+        if self.user:
+            print(f"Bot logged in as {self.user}")
+        else:
+            print("Bot failed to login. Safely exiting...")
+            await self.close()
+
+    async def start(self, *, token: str) -> None:
+        """
+        Logs in the client with the specified credentials and calls the :meth:`setup_hook` method
+        then creates a websocket connection and lets the websocket listen to messages / events
+        from Discord.
+        """
+
+        self.logger.info("Starting bot...")
+        async with aiohttp.ClientSession() as self.session:
+            try:
+                await super().start(token)
+            finally:
+                self.logger.info("Shutdown bot.")
