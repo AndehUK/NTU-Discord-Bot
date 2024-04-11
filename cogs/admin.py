@@ -12,6 +12,11 @@ if TYPE_CHECKING:
     from bot import DevSocBot
 
 
+GUILD_MESSAGEABLE = Union[
+    discord.TextChannel, discord.Thread, discord.StageChannel, discord.VoiceChannel
+]
+
+
 class Admin(Cog):
     @app_commands.command(name="adminhelp", description="Show the admin help menu")
     @app_commands.default_permissions(moderate_members=True)
@@ -86,6 +91,48 @@ class Admin(Cog):
             await member.remove_roles(*roles_to_remove)
             await member.add_roles(servermute_role)
             await itr.followup.send(f"Muted {member.mention} ({member})!")
+
+    @app_commands.command(
+        name="clear",
+        description="Clears a specified number of messages from the channel",
+    )
+    @app_commands.default_permissions(manage_messages=True)
+    @app_commands.guild_only()
+    async def clear(
+        self,
+        itr: discord.Interaction[DevSocBot],
+        amount: app_commands.Range[int, 1, 24],
+    ) -> None:
+        if not isinstance(itr.channel, GUILD_MESSAGEABLE):
+            return await itr.response.send_message(
+                "This command cannot be used in this channel.", ephemeral=True
+            )
+
+        await itr.response.defer(ephemeral=True)
+
+        try:
+            messages = await itr.channel.purge(limit=amount)
+            embed = discord.Embed(
+                title="Chat Cleared",
+                description=(
+                    f"{len(messages)} messages cleared from {itr.channel.mention}!\n"
+                    f"{discord.utils.format_dt(discord.utils.utcnow(), 'R')}"
+                ),
+                color=0xE7EC11,
+            )
+            for message in messages:
+                embed.add_field(
+                    name=message.author.display_name,
+                    value="Embedded Message" if message.embeds else message.content,
+                    inline=False,
+                )
+            await itr.followup.send(embed=embed)
+            # TODO: Send a log to bot log channel
+        except Exception as e:
+            return await itr.followup.send(
+                f"An error occurred while trying to clear messages: {e}",
+                ephemeral=True,
+            )
 
     @app_commands.command(
         name="unassigned",
