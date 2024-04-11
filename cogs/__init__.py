@@ -3,4 +3,4 @@
 # Core Imports
 from typing import Tuple
 
-COGS: Tuple[str, ...] = ()
+COGS: Tuple[str, ...] = ("cogs.admin",)
