@@ -77,9 +77,9 @@ class DevSocBot(commands.Bot):
 
         self._is_ready = True
         if self.user:
-            print(f"Bot logged in as {self.user}")
+            self.logger.info(f"Bot logged in as {self.user}")
         else:
-            print("Bot failed to login. Safely exiting...")
+            self.logger.critical("Bot failed to login. Safely exiting...")
             await self.close()
 
     async def start(self, *, token: str) -> None:
