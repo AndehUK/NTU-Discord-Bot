@@ -35,6 +35,8 @@ class DevSocBot(commands.Bot):
             },
         )
 
+        self.remove_command("help")
+
     async def setup_hook(self) -> None:
         """
         A coroutine to be called to setup the bot after logging in
