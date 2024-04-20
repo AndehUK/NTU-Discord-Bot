@@ -7,14 +7,10 @@ import discord
 from discord import app_commands
 
 from utils.cog import Cog
+from utils.types import GUILD_MESSAGEABLE
 
 if TYPE_CHECKING:
     from bot import DevSocBot
-
-
-GUILD_MESSAGEABLE = Union[
-    discord.TextChannel, discord.Thread, discord.StageChannel, discord.VoiceChannel
-]
 
 
 class Admin(Cog):
