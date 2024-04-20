@@ -91,7 +91,4 @@ class DevSocBot(commands.Bot):
 
         self.logger.info("Starting bot...")
         async with aiohttp.ClientSession() as self.session:
-            try:
-                await super().start(token)
-            finally:
-                self.logger.info("Shutdown bot.")
+            await super().start(token)

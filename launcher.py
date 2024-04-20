@@ -18,7 +18,14 @@ async def main() -> None:
         raise ValueError("No BOT_TOKEN found in environment variables.")
 
     bot = DevSocBot()
-    await bot.start(token=os.environ["BOT_TOKEN"])
+    try:
+        await bot.start(token=os.environ["BOT_TOKEN"])
+    except:
+        # Allows us to shutdown the bot gracefully
+        bot.logger.info("Shutting down bot... (In launcher)")
+        await bot.close()
+    finally:
+        bot.logger.info("Shutdown bot.")
 
 
 asyncio.run(main())
