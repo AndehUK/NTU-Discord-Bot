@@ -2,6 +2,7 @@ from __future__ import annotations
 
 # Core Imports
 import traceback
+from typing import Dict
 
 # Third Party Packages
 import aiohttp
@@ -10,6 +11,8 @@ from discord.ext import commands
 
 # Local Imports
 from cogs import COGS
+from cogs.rules.views import RulesView
+from utils.data import get_message_data
 from utils.logger import Logger
 from utils.tree import Tree
 
@@ -62,6 +65,12 @@ class DevSocBot(commands.Bot):
                 continue
 
         self.logger.info(f"Successfully loaded {loaded_cogs}/{len(COGS)+1} cogs!")
+
+        # Add Persistent Message Views
+        data: Dict[str, int] = await get_message_data(self.loop)
+        self.add_view(RulesView(), message_id=data.get("rules", None))
+
+        self.logger.info(f"Successfully added persistent message views!")
 
     async def on_ready(self) -> None:
         """
