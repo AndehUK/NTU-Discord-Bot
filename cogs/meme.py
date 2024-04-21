@@ -7,6 +7,7 @@ import discord
 
 from data.memes import rat_fact
 from utils.cog import Cog
+from utils.enums import Colours
 from utils.types import GUILD_MESSAGEABLE
 
 if TYPE_CHECKING:
@@ -35,7 +36,7 @@ class Meme(Cog):
             )
 
         elif "beans" in message.content.lower():
-            embed = discord.Embed(color=0xE7EC11)
+            embed = discord.Embed(color=Colours.YELLOW)
             embed.set_image(url="https://i.imgur.com/GkyCNCH.jpg")
             embed.set_footer(text="You thought i was gone? Shh")
             await message.author.send(embed=embed)

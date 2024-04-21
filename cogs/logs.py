@@ -5,7 +5,7 @@ from typing import Optional
 import discord
 
 from utils.cog import Cog
-from utils.enums import Channels
+from utils.enums import Channels, Colours
 from utils.types import GUILD_MESSAGEABLE
 
 
@@ -30,7 +30,7 @@ class Logs(Cog):
                 f"**Channel:** {message.channel.mention}"
                 + (f"\n\n[`Go to message`]({message.jump_url})" if before else "")
             ),
-            colour=0xE7EC11 if before else 0xE80202,
+            colour=Colours.YELLOW if before else Colours.RED,
         )
 
         if message.content:
@@ -86,7 +86,7 @@ class Logs(Cog):
         return embed
 
     async def send_log(self, embed: discord.Embed) -> None:
-        channel = self.bot.get_channel(Channels.BOT_LOGS.value)
+        channel = self.bot.get_channel(Channels.BOT_LOGS)
         if not isinstance(channel, GUILD_MESSAGEABLE):
             self.bot.logger.critical("Failed to get bot logs channel for logging")
             return
@@ -101,7 +101,7 @@ class Logs(Cog):
                 f"### Member: {member.display_name} ({member.name})\n"
                 f"### Mention: {member.mention}"
             ),
-            color=0xF4A701,
+            color=Colours.ORANGE,
         )
         embed.set_thumbnail(url=member.display_avatar.url)
 
@@ -127,7 +127,7 @@ class Logs(Cog):
                 f"### Member: {member.display_name} ({member.name})\n"
                 f"### Mention: {member.mention}"
             ),
-            colour=0xF4A701,
+            colour=Colours.ORANGE,
         )
         embed.set_thumbnail(url=member.display_avatar.url)
 

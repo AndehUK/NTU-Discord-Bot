@@ -7,6 +7,7 @@ import discord
 from discord import app_commands
 
 from utils.cog import Cog
+from utils.enums import Colours
 from utils.types import GUILD_MESSAGEABLE
 
 if TYPE_CHECKING:
@@ -29,7 +30,7 @@ class Admin(Cog):
         embed = discord.Embed(
             title="Admin Commands",
             description="*This dialog gives you all the admin commands for DevBot.*",
-            color=0xE7EC11,
+            color=Colours.YELLOW,
         )
 
         for command in cog.walk_app_commands():
@@ -114,7 +115,7 @@ class Admin(Cog):
                     f"{len(messages)} messages cleared from {itr.channel.mention}!\n"
                     f"{discord.utils.format_dt(discord.utils.utcnow(), 'R')}"
                 ),
-                color=0xE7EC11,
+                color=Colours.YELLOW,
             )
             for message in messages:
                 embed.add_field(
