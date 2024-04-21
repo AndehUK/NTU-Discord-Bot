@@ -16,7 +16,7 @@ Copy the `.env.example` file in the root of the project and name it `.env`, don'
 
 **NOTE:** When creating your bot application, ensure that all **ALL 3** Privileged Gateway Intents are enabled.
 
-![Discord Developer Portal showing all Privileged Gateway Intents enabled](docs/image.png)
+![Discord Developer Portal showing all Privileged Gateway Intents enabled](docs/intents.png)
 
 Now simply copy and paste your token into the `BOT_TOKEN` variable and you're good to go!
 
